@@ -828,22 +828,45 @@
       .map(t => t.textContent.trim());
     answers['q4'] = selectedTags.length ? selectedTags.join(', ') : '(none selected)';
 
-    let msg = '📋 NDTV App NPS Survey Response\n';
-    msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-    msg += `Submitted: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}\n\n`;
+    let msg = `
+<h2 style="font-family:sans-serif;color:#c0392b;margin-bottom:4px;">NDTV App NPS Survey Response</h2>
+<p style="font-family:sans-serif;font-size:13px;color:#888;margin-top:0;">Submitted: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+<table border="1" cellpadding="10" cellspacing="0" style="border-collapse:collapse;font-family:sans-serif;font-size:14px;width:100%;max-width:640px;border-color:#ddd;">
+  <thead>
+    <tr style="background:#c0392b;color:#fff;">
+      <th style="text-align:left;width:40%;">Question</th>
+      <th style="text-align:left;">Response</th>
+    </tr>
+  </thead>
+  <tbody>`;
 
+    let rowNum = 0;
     for (const [key, label] of Object.entries(labels)) {
       const val = answers[key];
-      msg += `${label}\n`;
-      msg += `  → ${val !== undefined && val !== '' ? val : '(skipped)'}\n\n`;
+      const response = (val !== undefined && val !== '') ? val : '(skipped)';
+      const bg = rowNum % 2 === 0 ? '#ffffff' : '#f9f9f9';
+      msg += `
+    <tr style="background:${bg};">
+      <td style="color:#555;font-weight:500;">${label}</td>
+      <td style="color:#1a1a1a;font-weight:600;">${response}</td>
+    </tr>`;
+      rowNum++;
     }
 
-    // NPS category for Q1
+    // NPS category row
     if (answers['q1'] !== undefined) {
       const score = +answers['q1'];
-      const cat = score <= 6 ? 'Detractor' : score <= 8 ? 'Passive' : 'Promoter';
-      msg += `NPS Category: ${cat} (score ${score})\n`;
+      const cat = score <= 6 ? '🔴 Detractor' : score <= 8 ? '🟡 Passive' : '🟢 Promoter';
+      msg += `
+    <tr style="background:#fff8f8;">
+      <td style="color:#555;font-weight:500;">NPS Category</td>
+      <td style="color:#c0392b;font-weight:700;">${cat} (score ${score})</td>
+    </tr>`;
     }
+
+    msg += `
+  </tbody>
+</table>`;
 
     return msg;
   }
