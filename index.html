@@ -16,7 +16,7 @@
   // Then paste all three below:
   const EMAILJS_PUBLIC_KEY  = 'i_XAXx-TRof_swDPG';
   const EMAILJS_SERVICE_ID  = 'service_y6yjz5r';
-  const EMAILJS_TEMPLATE_ID = 'template_ss5hbtc';
+  const EMAILJS_TEMPLATE_ID = 'template_kbjtxes';
   const RECIPIENT_EMAIL     = 'saptarshichowdhury17@gmail.com';
   // ───────────────────────────────────────────────────────────────
 </script>
@@ -853,18 +853,18 @@
     btn.textContent = 'Sending…';
     btn.disabled = true;
 
-    // Initialise EmailJS lazily (safe to call multiple times)
-    try { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); } catch(e) {}
-
     const messageBody = collectAllAnswers();
 
     try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+
+      const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         to_email: RECIPIENT_EMAIL,
         subject:  'NDTV App NPS Survey — New Response',
         message:  messageBody,
       });
 
+      console.log('EmailJS success:', response);
       document.getElementById('progressFill').style.width = '100%';
       setTimeout(() => {
         document.getElementById('survey').style.display = 'none';
@@ -872,11 +872,20 @@
       }, 300);
 
     } catch (err) {
-      console.error('EmailJS error:', err);
-      btn.textContent = '⚠ Send failed — check EmailJS config';
+      console.error('EmailJS error status:', err.status);
+      console.error('EmailJS error text:', err.text);
       btn.disabled = false;
       btn.style.background = '#c0392b';
-      alert('Could not send email. Please check that your EmailJS Public Key, Service ID, and Template ID are correctly set in the <script> block at the top of this file.');
+
+      let hint = '';
+      if (err.status === 400) hint = 'Template variables mismatch. Make sure your EmailJS template uses {{to_email}}, {{subject}}, and {{message}}.';
+      else if (err.status === 401) hint = 'Invalid Public Key. Double-check it in EmailJS → Account → API Keys.';
+      else if (err.status === 404) hint = 'Service ID or Template ID not found. Check them in your EmailJS dashboard.';
+      else if (err.status === 412) hint = 'Gmail service not connected properly. Re-authenticate your Gmail in EmailJS → Email Services.';
+      else hint = `Error ${err.status}: ${err.text}`;
+
+      btn.textContent = '⚠ Send failed';
+      alert('EmailJS Error:\n\n' + hint + '\n\nOpen browser console (F12) for full details.');
     }
   }
 </script>
