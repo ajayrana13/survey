@@ -3,848 +3,264 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NDTV App — NPS Survey</title>
-<script>
-  const RECIPIENT_EMAIL = 'test90550@gmail.com';
-</script>
+<title>NDTV App — User Survey</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-  :root {
-    --red: #c0392b;
-    --red-light: #e74c3c;
-    --ink: #1a1a1a;
-    --muted: #666;
-    --border: #e2e2e2;
-    --bg: #fafaf8;
-    --card: #fff;
-    --accent: #f5f0e8;
-  }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-    padding: 40px 20px 80px;
-  }
-
-  .masthead {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 48px;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .ndtv-logo {
-    background: var(--red);
-    color: #fff;
-    font-family: 'Playfair Display', serif;
-    font-weight: 900;
-    font-size: 22px;
-    padding: 6px 14px;
-    letter-spacing: 1px;
-    border-radius: 2px;
-  }
-
-  .masthead-meta {
-    border-left: 2px solid var(--border);
-    padding-left: 14px;
-  }
-
-  .masthead-meta p {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    font-weight: 600;
-  }
-
-  .survey-wrap {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  .survey-header {
-    margin-bottom: 40px;
-  }
-
-  .survey-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(28px, 5vw, 42px);
-    font-weight: 900;
-    line-height: 1.15;
-    margin-bottom: 12px;
-    color: var(--ink);
-  }
-
-  .survey-header p {
-    font-size: 15px;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 560px;
-    font-weight: 300;
-  }
-
-  .progress-bar {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    margin-bottom: 40px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--red);
-    border-radius: 2px;
-    transition: width 0.4s ease;
-  }
-
-  .question-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 32px;
-    margin-bottom: 20px;
-    transition: box-shadow 0.2s;
-  }
-
-  .question-card:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-  }
-
-  .q-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--red);
-    font-weight: 600;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .q-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .q-text {
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.5;
-    margin-bottom: 24px;
-    color: var(--ink);
-  }
-
-  /* NPS Scale */
-  .nps-scale {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .scale-numbers {
-    display: flex;
-    gap: 6px;
-  }
-
-  .scale-num {
-    flex: 1;
-    height: 44px;
-    border: 1.5px solid var(--border);
-    border-radius: 4px;
-    background: var(--bg);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .scale-num:hover {
-    border-color: var(--red);
-    color: var(--red);
-    background: #fff5f5;
-  }
-
-  .scale-num.selected {
-    background: var(--red);
-    border-color: var(--red);
-    color: #fff;
-  }
-
-  .scale-num.detractor { border-color: #f5b7b1; }
-  .scale-num.passive { border-color: #fad7a0; }
-  .scale-num.promoter { border-color: #a9dfbf; }
-
-  .scale-num.detractor.selected { background: #e74c3c; border-color: #e74c3c; }
-  .scale-num.passive.selected { background: #e67e22; border-color: #e67e22; }
-  .scale-num.promoter.selected { background: #27ae60; border-color: #27ae60; }
-
-  .scale-legend {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 500;
-  }
-
-  /* Radio options */
-  .options-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .option-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-size: 14px;
-    font-weight: 400;
-  }
-
-  .option-item:hover {
-    border-color: var(--red-light);
-    background: #fff9f9;
-  }
-
-  .option-item.selected {
-    border-color: var(--red);
-    background: #fff5f5;
-    font-weight: 500;
-  }
-
-  .option-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-  }
-
-  .option-item.selected .option-dot {
-    border-color: var(--red);
-    background: var(--red);
-  }
-
-  .option-item.selected .option-dot::after {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: white;
-    border-radius: 50%;
-  }
-
-  /* Checkbox */
-  .checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-size: 14px;
-  }
-
-  .checkbox-item:hover {
-    border-color: var(--red-light);
-    background: #fff9f9;
-  }
-
-  .checkbox-item.selected {
-    border-color: var(--red);
-    background: #fff5f5;
-    font-weight: 500;
-  }
-
-  .check-box {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-    border: 2px solid var(--border);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    font-size: 10px;
-    color: white;
-  }
-
-  .checkbox-item.selected .check-box {
-    border-color: var(--red);
-    background: var(--red);
-  }
-
-  /* Textarea */
-  .open-text {
-    width: 100%;
-    min-height: 100px;
-    padding: 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    background: var(--bg);
-    resize: vertical;
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; padding: 2rem 1rem; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  .header { margin-bottom: 2rem; }
+  .header h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+  .header p { font-size: 14px; color: #666; }
+  .section { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .q-label { font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 12px; display: flex; gap: 8px; align-items: flex-start; }
+  .q-num { background: #EEEDFE; color: #3C3489; border-radius: 50%; width: 22px; height: 22px; min-width: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-top: 1px; }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  label.field-label { font-size: 13px; color: #555; display: block; margin-bottom: 5px; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #ddd;
+    border-radius: 8px; background: #fff; color: #1a1a1a; font-family: inherit;
     transition: border-color 0.15s;
-    outline: none;
   }
-
-  .open-text:focus {
-    border-color: var(--red);
-    background: #fff;
-  }
-
-  .open-text::placeholder {
-    color: #bbb;
-  }
-
-  /* Rating stars */
-  .star-row {
-    display: flex;
-    gap: 10px;
-  }
-
-  .star {
-    font-size: 28px;
-    cursor: pointer;
-    color: var(--border);
-    transition: color 0.1s, transform 0.1s;
-    user-select: none;
-  }
-
-  .star:hover, .star.lit {
-    color: #f39c12;
-    transform: scale(1.15);
-  }
-
-  /* Tags */
-  .tag-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .tag {
-    padding: 7px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 100px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-weight: 400;
-    color: var(--ink);
-    background: var(--bg);
-  }
-
-  .tag:hover {
-    border-color: var(--red-light);
-    background: #fff5f5;
-  }
-
-  .tag.selected {
-    border-color: var(--red);
-    background: var(--red);
-    color: white;
-    font-weight: 500;
-  }
-
-  /* Section divider */
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 700;
-    margin: 40px 0 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--ink);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-num {
-    background: var(--ink);
-    color: white;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .hint {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 8px;
-    font-style: italic;
-  }
-
-  /* Submit */
-  .submit-wrap {
-    margin-top: 48px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
-  .submit-btn {
-    background: var(--red);
-    color: white;
-    border: none;
-    padding: 14px 40px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    border-radius: 4px;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .submit-btn:hover {
-    background: #a93226;
-    transform: translateY(-1px);
-  }
-
-  .submit-note {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  /* Thank you */
-  .thankyou {
-    display: none;
-    text-align: center;
-    padding: 80px 20px;
-    animation: fadeUp 0.5s ease forwards;
-  }
-
-  .thankyou-icon {
-    font-size: 56px;
-    margin-bottom: 20px;
-  }
-
-  .thankyou h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    margin-bottom: 12px;
-  }
-
-  .thankyou p {
-    color: var(--muted);
-    font-size: 15px;
-    font-weight: 300;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 520px) {
-    .scale-numbers { gap: 3px; }
-    .scale-num { height: 38px; font-size: 12px; }
-    .question-card { padding: 20px; }
-  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #534AB7; box-shadow: 0 0 0 3px #EEEDFE; }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid #ddd; border-radius: 20px; padding: 6px 14px; font-size: 13px; color: #555; cursor: pointer; background: transparent; transition: all 0.15s; font-family: inherit; }
+  .chip:hover { border-color: #534AB7; color: #534AB7; background: #EEEDFE; }
+  .chip.selected { background: #EEEDFE; border-color: #534AB7; color: #3C3489; font-weight: 500; }
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+  .cat-chip { border: 1px solid #e5e5e0; border-radius: 8px; padding: 10px 8px; font-size: 13px; color: #555; cursor: pointer; text-align: center; background: transparent; transition: all 0.15s; font-family: inherit; line-height: 1.4; }
+  .cat-chip .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .cat-chip:hover { border-color: #534AB7; color: #534AB7; background: #EEEDFE; }
+  .cat-chip.selected { background: #EEEDFE; border-color: #534AB7; color: #3C3489; font-weight: 500; }
+  .rating-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rating-table th { color: #888; font-weight: 400; text-align: center; padding: 6px 4px; border-bottom: 1px solid #eee; }
+  .rating-table th:first-child { text-align: left; }
+  .rating-table td { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; }
+  .rating-table tr:last-child td { border-bottom: none; }
+  .radio-cell { text-align: center; }
+  .radio-cell input[type=radio] { accent-color: #534AB7; width: 16px; height: 16px; cursor: pointer; }
+  .compare-group { display: flex; flex-direction: column; gap: 8px; }
+  .compare-opt { display: flex; align-items: center; gap: 10px; border: 1px solid #e5e5e0; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 13px; color: #555; transition: all 0.15s; }
+  .compare-opt:hover { border-color: #534AB7; color: #534AB7; background: #EEEDFE; }
+  .compare-opt.selected { background: #EEEDFE; border-color: #534AB7; color: #3C3489; font-weight: 500; }
+  .compare-opt input[type=radio] { accent-color: #534AB7; }
+  .submit-btn { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; background: #534AB7; color: #fff; border: none; border-radius: 10px; cursor: pointer; margin-top: 0.5rem; transition: background 0.15s; font-family: inherit; }
+  .submit-btn:hover { background: #3C3489; }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .success { display: none; text-align: center; padding: 3rem 1rem; background: #fff; border-radius: 12px; border: 1px solid #e5e5e0; }
+  .success .icon { font-size: 48px; margin-bottom: 12px; }
+  .success h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .success p { font-size: 14px; color: #666; }
+  .error-msg { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; }
+  /* EmailJS config box */
+  .config-notice { background: #fffbea; border: 1px solid #f5c518; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 13px; color: #7a5c00; line-height: 1.6; }
+  .config-notice strong { display: block; margin-bottom: 4px; font-size: 14px; }
+  .config-notice code { background: #fff3c4; border-radius: 4px; padding: 1px 5px; font-family: monospace; font-size: 12px; }
 </style>
 </head>
 <body>
-
-<div class="masthead">
-  <div class="ndtv-logo">NDTV</div>
-  <div class="masthead-meta">
-    <p>App Feedback Survey &nbsp;·&nbsp; NPS Edition</p>
-  </div>
-</div>
-
-<div class="survey-wrap" id="survey">
-
-  <div class="survey-header">
-    <h1>How are we doing?</h1>
-    <p>Help us improve the NDTV app experience. This survey takes about 2 minutes and every response is read by our product team.</p>
+<div class="wrap">
+  <div class="header">
+    <h1>📰 NDTV App — User Survey</h1>
+    <p>Help us improve your news experience. Takes ~2 minutes.</p>
   </div>
 
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill" style="width: 10%"></div>
-  </div>
 
-  <!-- SECTION 1: Core NPS -->
-  <div class="section-title"><span class="section-num">1</span> Likelihood to Recommend</div>
 
-  <div class="question-card">
-    <div class="q-label">Q1 &nbsp; Core NPS</div>
-    <div class="q-text">How likely are you to recommend the NDTV app to a friend or colleague?</div>
-    <div class="nps-scale">
-      <div class="scale-numbers" id="q1-scale">
-        <div class="scale-num detractor" data-val="0" onclick="selectScale('q1', 0)">0</div>
-        <div class="scale-num detractor" data-val="1" onclick="selectScale('q1', 1)">1</div>
-        <div class="scale-num detractor" data-val="2" onclick="selectScale('q1', 2)">2</div>
-        <div class="scale-num detractor" data-val="3" onclick="selectScale('q1', 3)">3</div>
-        <div class="scale-num detractor" data-val="4" onclick="selectScale('q1', 4)">4</div>
-        <div class="scale-num detractor" data-val="5" onclick="selectScale('q1', 5)">5</div>
-        <div class="scale-num detractor" data-val="6" onclick="selectScale('q1', 6)">6</div>
-        <div class="scale-num passive" data-val="7" onclick="selectScale('q1', 7)">7</div>
-        <div class="scale-num passive" data-val="8" onclick="selectScale('q1', 8)">8</div>
-        <div class="scale-num promoter" data-val="9" onclick="selectScale('q1', 9)">9</div>
-        <div class="scale-num promoter" data-val="10" onclick="selectScale('q1', 10)">10</div>
-      </div>
-      <div class="scale-legend">
-        <span>😞 Not at all likely</span>
-        <span>😐 Neutral</span>
-        <span>😊 Extremely likely</span>
+  <div id="formArea">
+    <!-- Demographics -->
+    <div class="section">
+      <div class="demo-grid">
+        <div>
+          <label class="field-label" for="name">Name</label>
+          <input type="text" id="name" placeholder="Your name" />
+        </div>
+        <div>
+          <label class="field-label" for="age">Age</label>
+          <input type="number" id="age" placeholder="e.g. 28" min="10" max="99" />
+        </div>
+        <div>
+          <label class="field-label" for="gender">Gender</label>
+          <select id="gender">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Non-binary</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
       </div>
     </div>
-    <p class="hint" id="q1-hint"></p>
-  </div>
 
-  <div class="question-card">
-    <div class="q-label">Q2 &nbsp; Open Follow-Up</div>
-    <div class="q-text">What is the <strong>primary reason</strong> for your score?</div>
-    <textarea class="open-text" placeholder="Tell us what shaped your rating…" oninput="updateProgress()"></textarea>
-  </div>
-
-  <!-- SECTION 2: Content Quality -->
-  <div class="section-title"><span class="section-num">2</span> Content Quality</div>
-
-  <div class="question-card">
-    <div class="q-label">Q3 &nbsp; Multi-Select — Content</div>
-    <div class="q-text">Which content categories do you use <strong>most often</strong> on the NDTV app? <em>(Select all that apply)</em></div>
-    <div class="tag-cloud" id="q4-tags">
-      <div class="tag" onclick="toggleTag(this)">Breaking News</div>
-      <div class="tag" onclick="toggleTag(this)">Live TV</div>
-      <div class="tag" onclick="toggleTag(this)">India Politics</div>
-      <div class="tag" onclick="toggleTag(this)">World News</div>
-      <div class="tag" onclick="toggleTag(this)">Business / Economy</div>
-      <div class="tag" onclick="toggleTag(this)">Sports</div>
-      <div class="tag" onclick="toggleTag(this)">Bollywood / Entertainment</div>
-      <div class="tag" onclick="toggleTag(this)">Technology</div>
-      <div class="tag" onclick="toggleTag(this)">Health &amp; Lifestyle</div>
-      <div class="tag" onclick="toggleTag(this)">Weather</div>
-      <div class="tag" onclick="toggleTag(this)">Podcasts / Radio</div>
-    </div>
-  </div>
-
-  <!-- SECTION 3: App Experience -->
-  <div class="section-title"><span class="section-num">3</span> App Experience</div>
-
-  <div class="question-card">
-    <div class="q-label">Q4 &nbsp; App Performance</div>
-    <div class="q-text">How would you rate the <strong>speed and stability</strong> of the NDTV app?</div>
-    <div class="star-row" id="q5-stars">
-      <span class="star" data-val="1" onclick="selectStar('q5',1)">★</span>
-      <span class="star" data-val="2" onclick="selectStar('q5',2)">★</span>
-      <span class="star" data-val="3" onclick="selectStar('q5',3)">★</span>
-      <span class="star" data-val="4" onclick="selectStar('q5',4)">★</span>
-      <span class="star" data-val="5" onclick="selectStar('q5',5)">★</span>
-    </div>
-  </div>
-
-  <div class="question-card">
-    <div class="q-label">Q5 &nbsp; Single Choice — UX</div>
-    <div class="q-text">How easy is it to <strong>find the news you're looking for</strong> in the NDTV app?</div>
-    <div class="options-list" id="q6-opts">
-      <div class="option-item" onclick="selectOption('q6', this)">
-        <div class="option-dot"></div> Very easy — I always find what I need quickly
-      </div>
-      <div class="option-item" onclick="selectOption('q6', this)">
-        <div class="option-dot"></div> Mostly easy — occasional difficulty
-      </div>
-      <div class="option-item" onclick="selectOption('q6', this)">
-        <div class="option-dot"></div> Neutral — neither easy nor difficult
-      </div>
-      <div class="option-item" onclick="selectOption('q6', this)">
-        <div class="option-dot"></div> Somewhat difficult — navigation is confusing
-      </div>
-      <div class="option-item" onclick="selectOption('q6', this)">
-        <div class="option-dot"></div> Very difficult — I often can't find what I want
+    <!-- Q1 -->
+    <div class="section">
+      <div class="q-label"><span class="q-num">1</span>How do you consume news?</div>
+      <div class="chip-group" id="q1">
+        <button class="chip" type="button" onclick="toggleChip(this,'q1')">Web</button>
+        <button class="chip" type="button" onclick="toggleChip(this,'q1')">App</button>
+        <button class="chip" type="button" onclick="toggleChip(this,'q1')">Social media</button>
+        <button class="chip" type="button" onclick="toggleChip(this,'q1')">TV</button>
+        <button class="chip" type="button" onclick="toggleChip(this,'q1')">OTT</button>
       </div>
     </div>
-  </div>
 
-  <div class="question-card">
-    <div class="q-label">Q6 &nbsp; Feature — Live TV &amp; Video</div>
-    <div class="q-text">How satisfied are you with the <strong>Live TV and video streaming</strong> experience on the app?</div>
-    <div class="nps-scale">
-      <div class="scale-numbers" id="q7-scale">
-        <div class="scale-num" data-val="1" onclick="selectScale('q7',1)">1</div>
-        <div class="scale-num" data-val="2" onclick="selectScale('q7',2)">2</div>
-        <div class="scale-num" data-val="3" onclick="selectScale('q7',3)">3</div>
-        <div class="scale-num" data-val="4" onclick="selectScale('q7',4)">4</div>
-        <div class="scale-num" data-val="5" onclick="selectScale('q7',5)">5</div>
-        <div class="scale-num" data-val="6" onclick="selectScale('q7',6)">6</div>
-        <div class="scale-num" data-val="7" onclick="selectScale('q7',7)">7</div>
-        <div class="scale-num" data-val="8" onclick="selectScale('q7',8)">8</div>
-        <div class="scale-num" data-val="9" onclick="selectScale('q7',9)">9</div>
-        <div class="scale-num" data-val="10" onclick="selectScale('q7',10)">10</div>
-      </div>
-      <div class="scale-legend">
-        <span>Very poor</span>
-        <span>Excellent</span>
+    <!-- Q2 -->
+    <div class="section">
+      <div class="q-label"><span class="q-num">2</span>Which content categories do you use most on the NDTV app?</div>
+      <div class="cat-grid" id="q2">
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">🌍</span>World</button>
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">🏛️</span>Politics</button>
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">🎬</span>Entertainment</button>
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">⚽</span>Sports</button>
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">💻</span>Tech</button>
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">📈</span>Business</button>
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">🏥</span>Health</button>
+        <button class="cat-chip" type="button" onclick="toggleChip(this,'q2')"><span class="icon">🌤️</span>Weather</button>
       </div>
     </div>
-  </div>
 
-  <!-- SECTION 4: Premium & Notifications -->
-  <div class="section-title"><span class="section-num">4</span> Premium &amp; Notifications</div>
+    <!-- Q3 -->
+    <div class="section">
+      <div class="q-label"><span class="q-num">3</span>How would you rate the NDTV app on these aspects?</div>
+      <table class="rating-table">
+        <thead>
+          <tr>
+            <th style="text-align:left; width:46%;">Aspect</th>
+            <th>Poor</th><th>Fair</th><th>Good</th><th>Great</th><th>N/A</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Speed &amp; stability</td>
+            <td class="radio-cell"><input type="radio" name="r1" value="Poor"></td>
+            <td class="radio-cell"><input type="radio" name="r1" value="Fair"></td>
+            <td class="radio-cell"><input type="radio" name="r1" value="Good"></td>
+            <td class="radio-cell"><input type="radio" name="r1" value="Great"></td>
+            <td class="radio-cell"><input type="radio" name="r1" value="N/A"></td>
+          </tr>
+          <tr>
+            <td>Categories easily discoverable</td>
+            <td class="radio-cell"><input type="radio" name="r2" value="Poor"></td>
+            <td class="radio-cell"><input type="radio" name="r2" value="Fair"></td>
+            <td class="radio-cell"><input type="radio" name="r2" value="Good"></td>
+            <td class="radio-cell"><input type="radio" name="r2" value="Great"></td>
+            <td class="radio-cell"><input type="radio" name="r2" value="N/A"></td>
+          </tr>
+          <tr>
+            <td>Ad load — too many ads</td>
+            <td class="radio-cell"><input type="radio" name="r3" value="Poor"></td>
+            <td class="radio-cell"><input type="radio" name="r3" value="Fair"></td>
+            <td class="radio-cell"><input type="radio" name="r3" value="Good"></td>
+            <td class="radio-cell"><input type="radio" name="r3" value="Great"></td>
+            <td class="radio-cell"><input type="radio" name="r3" value="N/A"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <div class="question-card">
-    <div class="q-label">Q7 &nbsp; Premium Value</div>
-    <div class="q-text">If you are an NDTV Premium subscriber — how would you rate the <strong>value for money</strong> of your subscription?</div>
-    <div class="options-list" id="q8-opts">
-      <div class="option-item" onclick="selectOption('q8', this)">
-        <div class="option-dot"></div> Excellent value — worth every rupee
-      </div>
-      <div class="option-item" onclick="selectOption('q8', this)">
-        <div class="option-dot"></div> Good value — mostly satisfied
-      </div>
-      <div class="option-item" onclick="selectOption('q8', this)">
-        <div class="option-dot"></div> Average — could be improved
-      </div>
-      <div class="option-item" onclick="selectOption('q8', this)">
-        <div class="option-dot"></div> Poor value — not worth subscribing
-      </div>
-      <div class="option-item" onclick="selectOption('q8', this)">
-        <div class="option-dot"></div> I don't use Premium
+    <!-- Q4 -->
+    <div class="section">
+      <div class="q-label"><span class="q-num">4</span>Which app do you use most / like most on your phone?</div>
+      <input type="text" id="q4" placeholder="e.g. YouTube, WhatsApp, Instagram…" />
+    </div>
+
+    <!-- Q5 -->
+    <div class="section">
+      <div class="q-label"><span class="q-num">5</span>Compared to other news apps, the NDTV app is…</div>
+      <div class="compare-group" id="q5">
+        <label class="compare-opt"><input type="radio" name="q5r" value="Much better" onchange="highlightCompare(this)"> Much better</label>
+        <label class="compare-opt"><input type="radio" name="q5r" value="Somewhat better" onchange="highlightCompare(this)"> Somewhat better</label>
+        <label class="compare-opt"><input type="radio" name="q5r" value="About the same" onchange="highlightCompare(this)"> About the same</label>
+        <label class="compare-opt"><input type="radio" name="q5r" value="Somewhat worse" onchange="highlightCompare(this)"> Somewhat worse</label>
+        <label class="compare-opt"><input type="radio" name="q5r" value="Much worse" onchange="highlightCompare(this)"> Much worse</label>
       </div>
     </div>
-  </div>
 
-  <div class="question-card">
-    <div class="q-label">Q8 &nbsp; Notifications</div>
-    <div class="q-text">How relevant and timely are the <strong>push notifications and news alerts</strong> you receive from the app?</div>
-    <div class="nps-scale">
-      <div class="scale-numbers" id="q9-scale">
-        <div class="scale-num" data-val="1" onclick="selectScale('q9',1)">1</div>
-        <div class="scale-num" data-val="2" onclick="selectScale('q9',2)">2</div>
-        <div class="scale-num" data-val="3" onclick="selectScale('q9',3)">3</div>
-        <div class="scale-num" data-val="4" onclick="selectScale('q9',4)">4</div>
-        <div class="scale-num" data-val="5" onclick="selectScale('q9',5)">5</div>
-        <div class="scale-num" data-val="6" onclick="selectScale('q9',6)">6</div>
-        <div class="scale-num" data-val="7" onclick="selectScale('q9',7)">7</div>
-        <div class="scale-num" data-val="8" onclick="selectScale('q9',8)">8</div>
-        <div class="scale-num" data-val="9" onclick="selectScale('q9',9)">9</div>
-        <div class="scale-num" data-val="10" onclick="selectScale('q9',10)">10</div>
-      </div>
-      <div class="scale-legend">
-        <span>Not relevant at all</span>
-        <span>Highly relevant</span>
-      </div>
+    <!-- Q6 -->
+    <div class="section">
+      <div class="q-label"><span class="q-num">6</span>What is the single biggest thing you'd change or improve about the NDTV app?</div>
+      <textarea id="q6" placeholder="Share your most important suggestion…"></textarea>
     </div>
+
+    <p class="error-msg" id="errorMsg">⚠️ Something went wrong. Please check your EmailJS credentials and try again.</p>
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">Submit feedback →</button>
   </div>
 
-  <!-- SECTION 5: Competitive & Improvement -->
-  <div class="section-title"><span class="section-num">5</span> Improvement</div>
-
-  <div class="question-card">
-    <div class="q-label">Q9 &nbsp; Competitor Comparison</div>
-    <div class="q-text">Compared to other news apps you use, the NDTV app is…</div>
-    <div class="options-list" id="q10-opts">
-      <div class="option-item" onclick="selectOption('q10', this)">
-        <div class="option-dot"></div> Much better
-      </div>
-      <div class="option-item" onclick="selectOption('q10', this)">
-        <div class="option-dot"></div> Somewhat better
-      </div>
-      <div class="option-item" onclick="selectOption('q10', this)">
-        <div class="option-dot"></div> About the same
-      </div>
-      <div class="option-item" onclick="selectOption('q10', this)">
-        <div class="option-dot"></div> Somewhat worse
-      </div>
-      <div class="option-item" onclick="selectOption('q10', this)">
-        <div class="option-dot"></div> Much worse
-      </div>
-    </div>
+  <!-- Success screen -->
+  <div class="success" id="successScreen">
+    <div class="icon">✅</div>
+    <h2>Thanks for your feedback!</h2>
+    <p>Your responses have been sent to <strong>saptarshichowdhury17@gmail.com</strong>.<br>They'll help make NDTV even better.</p>
   </div>
-
-  <div class="question-card">
-    <div class="q-label">Q10 &nbsp; Biggest Pain Point</div>
-    <div class="q-text">What is the <strong>single biggest thing</strong> you would change or improve about the NDTV app?</div>
-    <textarea class="open-text" placeholder="Your most important suggestion…" oninput="updateProgress()"></textarea>
-  </div>
-
-  <div class="question-card">
-    <div class="q-label">Q11 &nbsp; Mobile Usage</div>
-    <div class="q-text">Which is the <strong>most used app</strong> on your mobile device?</div>
-    <textarea class="open-text" placeholder="e.g. WhatsApp, YouTube, Instagram…" oninput="updateProgress()"></textarea>
-  </div>
-
-  <div class="question-card">
-    <div class="q-label">Q12 &nbsp; Churn Risk</div>
-    <div class="q-text">How likely are you to <strong>continue using</strong> the NDTV app as your primary news source over the next 6 months?</div>
-    <div class="nps-scale">
-      <div class="scale-numbers" id="q12-scale">
-        <div class="scale-num detractor" data-val="0" onclick="selectScale('q12',0)">0</div>
-        <div class="scale-num detractor" data-val="1" onclick="selectScale('q12',1)">1</div>
-        <div class="scale-num detractor" data-val="2" onclick="selectScale('q12',2)">2</div>
-        <div class="scale-num detractor" data-val="3" onclick="selectScale('q12',3)">3</div>
-        <div class="scale-num detractor" data-val="4" onclick="selectScale('q12',4)">4</div>
-        <div class="scale-num detractor" data-val="5" onclick="selectScale('q12',5)">5</div>
-        <div class="scale-num detractor" data-val="6" onclick="selectScale('q12',6)">6</div>
-        <div class="scale-num passive" data-val="7" onclick="selectScale('q12',7)">7</div>
-        <div class="scale-num passive" data-val="8" onclick="selectScale('q12',8)">8</div>
-        <div class="scale-num promoter" data-val="9" onclick="selectScale('q12',9)">9</div>
-        <div class="scale-num promoter" data-val="10" onclick="selectScale('q12',10)">10</div>
-      </div>
-      <div class="scale-legend">
-        <span>Not likely to continue</span>
-        <span>Definitely continuing</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="submit-wrap">
-    <button class="submit-btn" onclick="submitSurvey()">Submit Feedback →</button>
-    <span class="submit-note">Anonymous · Takes ~2 min · Read by NDTV product team</span>
-  </div>
-
-</div>
-
-<!-- Thank You -->
-<div class="thankyou" id="thankyou">
-  <div class="thankyou-icon">🙏</div>
-  <h2>Thank you for your feedback!</h2>
-  <p>Your response has been recorded. The NDTV product team<br>reads every submission to improve your experience.</p>
 </div>
 
 <script>
-  const answers = {};
+  // ============================================================
+  //  REPLACE THESE THREE VALUES WITH YOUR EMAILJS CREDENTIALS
+  // ============================================================
+  const EMAILJS_PUBLIC_KEY  = 'i_XAXx-TRof_swDPG';   // Account > API Keys
+  const EMAILJS_SERVICE_ID  = 'service_f9nyizk';       // Email Services
+  const EMAILJS_TEMPLATE_ID = 'template_a1kjalp';      // Email Templates
+  // ============================================================
 
-  function selectScale(id, val) {
-    const scale = document.getElementById(id + '-scale');
-    scale.querySelectorAll('.scale-num').forEach(n => {
-      n.classList.toggle('selected', +n.dataset.val === val);
-    });
-    answers[id] = val;
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
-    if (id === 'q1') {
-      const hint = document.getElementById('q1-hint');
-      if (val <= 6) hint.textContent = '😞 Detractor — We\'re sorry to hear that. Please tell us why below.';
-      else if (val <= 8) hint.textContent = '😐 Passive — Thanks! We\'d love to know what would make it a 10.';
-      else hint.textContent = '😊 Promoter — Wonderful! We\'re glad you love the app.';
-    }
-    updateProgress();
-  }
-
-  function selectOption(id, el) {
-    el.parentElement.querySelectorAll('.option-item').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-    answers[id] = el.innerText.trim();
-    updateProgress();
-  }
-
-  function toggleTag(el) {
+  function toggleChip(el, groupId) {
     el.classList.toggle('selected');
-    updateProgress();
   }
 
-  function selectStar(id, val) {
-    const stars = document.getElementById(id + '-stars');
-    stars.querySelectorAll('.star').forEach(s => {
-      s.classList.toggle('lit', +s.dataset.val <= val);
-    });
-    answers[id] = val;
-    updateProgress();
+  function highlightCompare(input) {
+    document.querySelectorAll('.compare-opt').forEach(o => o.classList.remove('selected'));
+    input.closest('.compare-opt').classList.add('selected');
   }
 
-  function updateProgress() {
-    const filled = Object.keys(answers).length +
-      (document.querySelector('.open-text')?.value ? 1 : 0);
-    const pct = Math.min(10 + filled * 8, 95);
-    document.getElementById('progressFill').style.width = pct + '%';
+  function getChips(groupId) {
+    const selected = [];
+    document.querySelectorAll('#' + groupId + ' .selected').forEach(el => selected.push(el.textContent.trim()));
+    return selected.length ? selected.join(', ') : 'Not selected';
   }
 
-  function submitSurvey() {
-    const labels = {
-      q1:  'Q1 — Likelihood to recommend (0–10)',
-      q2:  'Q2 — Primary reason for score',
-      q4:  'Q3 — Content categories used most',
-      q5:  'Q4 — App speed & stability (stars)',
-      q6:  'Q5 — Ease of finding news',
-      q7:  'Q6 — Live TV & video satisfaction (1–10)',
-      q8:  'Q7 — Premium subscription value',
-      q9:  'Q8 — Notification relevance (1–10)',
-      q10: 'Q9 — Compared to competitors',
-      q11: 'Q10 — Biggest improvement suggestion',
-      q13: 'Q11 — Most used app on mobile device',
-      q12: 'Q12 — Likelihood to continue using NDTV (0–10)',
+  function getRadio(name) {
+    const el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : 'Not answered';
+  }
+
+  function submitForm() {
+    const name = document.getElementById('name').value.trim();
+    if (!name) { alert('Please enter your name.'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const templateParams = {
+      name:   name,
+      age:    document.getElementById('age').value || 'Not provided',
+      gender: document.getElementById('gender').value || 'Not provided',
+      q1:     getChips('q1'),
+      q2:     getChips('q2'),
+      r1:     getRadio('r1'),
+      r2:     getRadio('r2'),
+      r3:     getRadio('r3'),
+      q4:     document.getElementById('q4').value.trim() || 'Not provided',
+      q5:     getRadio('q5r'),
+      q6:     document.getElementById('q6').value.trim() || 'Not provided',
+      to_email: 'saptarshichowdhury17@gmail.com'
     };
 
-    // Collect open texts
-    const openTexts = document.querySelectorAll('.open-text');
-    answers['q2']  = openTexts[0]?.value.trim() || '(no answer)';
-    answers['q11'] = openTexts[1]?.value.trim() || '(no answer)';
-    answers['q13'] = openTexts[2]?.value.trim() || '(no answer)';
-
-    // Multi-select tags
-    const selectedTags = [...document.querySelectorAll('#q4-tags .tag.selected')]
-      .map(t => t.textContent.trim());
-    answers['q4'] = selectedTags.length ? selectedTags.join(', ') : '(none selected)';
-
-    // Build plain-text email body
-    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-    let body = 'NDTV App NPS Survey Response\n';
-    body += 'Submitted: ' + timestamp + '\n';
-    body += '--------------------------------------------------\n\n';
-
-    for (const [key, label] of Object.entries(labels)) {
-      const val = answers[key];
-      const response = (val !== undefined && val !== '') ? String(val) : '(skipped)';
-      body += label + '\n-> ' + response + '\n\n';
-    }
-
-    if (answers['q1'] !== undefined) {
-      const score = +answers['q1'];
-      const cat = score <= 6 ? 'Detractor' : score <= 8 ? 'Passive' : 'Promoter';
-      body += 'NPS Category\n-> ' + cat + ' (score ' + score + ')\n';
-    }
-
-    const subject = encodeURIComponent('NDTV App NPS Survey — New Response');
-    const encodedBody = encodeURIComponent(body);
-    window.location.href = 'mailto:' + RECIPIENT_EMAIL + '?subject=' + subject + '&body=' + encodedBody;
-
-    // Show thank you screen
-    document.getElementById('progressFill').style.width = '100%';
-    setTimeout(() => {
-      document.getElementById('survey').style.display = 'none';
-      document.getElementById('thankyou').style.display = 'block';
-    }, 500);
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      .then(function() {
+        document.getElementById('formArea').style.display = 'none';
+        document.getElementById('configNotice').style.display = 'none';
+        document.getElementById('successScreen').style.display = 'block';
+      }, function(error) {
+        btn.disabled = false;
+        btn.textContent = 'Submit feedback →';
+        document.getElementById('errorMsg').style.display = 'block';
+        console.error('EmailJS error:', error);
+      });
   }
-
 </script>
 </body>
 </html>
