@@ -273,6 +273,9 @@
       to_email: 'saptarshichowdhury17@gmail.com'
     };
 
+    // Save to CSV immediately
+    downloadCSV(templateParams);
+
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
       .then(function() {
         document.getElementById('formArea').style.display = 'none';
@@ -284,6 +287,46 @@
         document.getElementById('errorMsg').style.display = 'block';
         console.error('EmailJS error:', error);
       });
+  }
+
+  function downloadCSV(data) {
+    const headers = [
+      'Timestamp', 'Name', 'Age', 'Gender',
+      'Q1 - How consume news online',
+      'Q2 - Category most likely to read/search',
+      'Q3 - Speed & Stability',
+      'Q3 - Categories discoverable',
+      'Q3 - Ad Load',
+      'Q3 - User Interface',
+      'Q4 - Favourite App',
+      'Q5 - How often use NDTV app',
+      'Q6 - Version Preference',
+      'Q7 - Biggest improvement suggestion'
+    ];
+
+    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+    const row = [
+      timestamp,
+      data.name, data.age, data.gender,
+      data.q1, data.q2,
+      data.r1, data.r2, data.r3, data.r4,
+      data.q4, data.q5, data.q6, data.q7
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`);
+
+    const csvContent = headers.map(h => `"${h}"`).join(',') + '\n' + row.join(',') + '\n';
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    const fileName = 'ndtv_survey_' + data.name.replace(/\s+/g, '_') + '_' + Date.now() + '.csv';
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 </script>
 </body>
