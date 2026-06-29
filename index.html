@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NDTV App — User Survey</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; padding: 2rem 1rem; }
@@ -53,7 +53,7 @@
   .success h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
   .success p { font-size: 14px; color: #666; }
   .error-msg { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; }
-  /* EmailJS config box */
+
   .config-notice { background: #fffbea; border: 1px solid #f5c518; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 13px; color: #7a5c00; line-height: 1.6; }
   .config-notice strong { display: block; margin-bottom: 4px; font-size: 14px; }
   .config-notice code { background: #fff3c4; border-radius: 4px; padding: 1px 5px; font-family: monospace; font-size: 12px; }
@@ -200,7 +200,7 @@
       <textarea id="q7" placeholder="Share your most important suggestion…"></textarea>
     </div>
 
-    <p class="error-msg" id="errorMsg">⚠️ Something went wrong. Please check your EmailJS credentials and try again.</p>
+
     <button class="submit-btn" id="submitBtn" onclick="submitForm()">Submit feedback →</button>
   </div>
 
@@ -208,20 +208,11 @@
   <div class="success" id="successScreen">
     <div class="icon">✅</div>
     <h2>Thanks for your feedback!</h2>
-    <p>Your responses have been sent to <strong>saptarshichowdhury17@gmail.com</strong>.<br>They'll help make NDTV even better.</p>
+    <p>Your responses have been saved successfully.<br>They'll help make NDTV even better.</p>
   </div>
 </div>
 
 <script>
-  // ============================================================
-  //  REPLACE THESE THREE VALUES WITH YOUR EMAILJS CREDENTIALS
-  // ============================================================
-  const EMAILJS_PUBLIC_KEY  = 'i_XAXx-TRof_swDPG';   // Account > API Keys
-  const EMAILJS_SERVICE_ID  = 'service_f9nyizk';       // Email Services
-  const EMAILJS_TEMPLATE_ID = 'template_a1kjalp';      // Email Templates
-  // ============================================================
-
-  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
   function toggleChip(el, groupId) {
     el.classList.toggle('selected');
@@ -254,7 +245,7 @@
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btn.textContent = 'Saving…';
 
     const templateParams = {
       name:   name,
@@ -270,23 +261,14 @@
       q5:     getRadio('q5r'),
       q6:     getRadio('q6r'),
       q7:     document.getElementById('q7').value.trim() || 'Not provided',
-      to_email: 'saptarshichowdhury17@gmail.com'
+
     };
 
-    // Save to CSV immediately
+    // Save to CSV
     downloadCSV(templateParams);
 
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-      .then(function() {
-        document.getElementById('formArea').style.display = 'none';
-        document.getElementById('configNotice').style.display = 'none';
-        document.getElementById('successScreen').style.display = 'block';
-      }, function(error) {
-        btn.disabled = false;
-        btn.textContent = 'Submit feedback →';
-        document.getElementById('errorMsg').style.display = 'block';
-        console.error('EmailJS error:', error);
-      });
+    document.getElementById('formArea').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
   }
 
   function downloadCSV(data) {
